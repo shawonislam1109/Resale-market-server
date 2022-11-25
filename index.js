@@ -30,6 +30,7 @@ async function run() {
     try {
         const ProductCollection = client.db('Resale-market').collection('allProduct')
         const OrderCollection = client.db('Resale-market').collection('OrderProduct')
+        const UserCollection = client.db('Resale-market').collection('AllUser')
 
 
         app.get('/allProducts', async (req, res) => {
@@ -54,6 +55,17 @@ async function run() {
             const query = req.body;
             const orderProduct = await OrderCollection.insertOne(query);
             res.send(orderProduct)
+        })
+        app.get('/orderProducts', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const orders = await OrderCollection.find(query).toArray()
+            res.send(orders);
+        })
+        app.post('/allUser', async (req, res) => {
+            const query = req.body;
+            const user = await UserCollection.insertOne(query)
+            res.send(user)
         })
     }
     finally {
