@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors')
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const stripe = require("stripe")(process.env.STIRPE_SK_key);
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -48,7 +49,7 @@ async function run() {
         const ProductCollection = client.db('Resale-market').collection('allProduct')
         const OrderCollection = client.db('Resale-market').collection('OrderProduct')
         const UserCollection = client.db('Resale-market').collection('AllUser')
-
+        const paymentCollection = client.db('Resale-market').collection('paymentDoc')
 
         app.get('/allProducts', async (req, res) => {
             const query = {};
@@ -82,6 +83,12 @@ async function run() {
             }
             const orders = await OrderCollection.find(query).toArray()
             res.send(orders);
+        })
+        app.get('/orderProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const orderProduct = await OrderCollection.find(query).toArray();
+            res.send(orderProduct);
         })
         app.delete('/orderProducts/:id', async (req, res) => {
             const id = req.params.id;
@@ -120,6 +127,27 @@ async function run() {
                 return res.send({ accessToken: token })
             }
             res.status(403).send({ accessToken: 'token' })
+        })
+        app.post('/create-payment-intent', async (req, res) => {
+            const product = req.body;
+            const payment = product.Price;
+            const price = 100 * payment
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: price,
+                currency: "usd",
+                "payment_method_types": [
+                    "card"
+                ],
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        })
+        app.post('/payment', async (req, res) => {
+            const query = req.body;
+            const paymentDoc = await paymentCollection.insertOne(query)
+            res.send(paymentDoc)
         })
         app.post('/allProducts', async (req, res) => {
             const query = req.body;
