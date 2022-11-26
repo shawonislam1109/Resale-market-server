@@ -62,11 +62,18 @@ async function run() {
             const orders = await OrderCollection.find(query).toArray()
             res.send(orders);
         })
+        app.delete('/orderProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await OrderCollection.deleteOne(filter);
+            res.send(result);
+        })
         app.get('/allUsers', async (req, res) => {
             const query = {};
             const users = await UserCollection.find(query).toArray();
             res.send(users);
         })
+
         app.post('/allUser', async (req, res) => {
             const query = req.body;
             const user = await UserCollection.insertOne(query)
