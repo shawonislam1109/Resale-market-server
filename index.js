@@ -62,10 +62,32 @@ async function run() {
             const orders = await OrderCollection.find(query).toArray()
             res.send(orders);
         })
+        app.get('/allUsers', async (req, res) => {
+            const query = {};
+            const users = await UserCollection.find(query).toArray();
+            res.send(users);
+        })
         app.post('/allUser', async (req, res) => {
             const query = req.body;
             const user = await UserCollection.insertOne(query)
             res.send(user)
+        })
+        app.post('/allProducts', async (req, res) => {
+            const query = req.body;
+            const allProduct = await ProductCollection.insertOne(query);
+            res.send(allProduct)
+        })
+        app.put('/allProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    soled: 'sold'
+                }
+            }
+            const result = await ProductCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
     }
     finally {
