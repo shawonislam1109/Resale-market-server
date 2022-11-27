@@ -63,6 +63,17 @@ async function run() {
             res.send(category);
 
         })
+        app.get('/products', jwtVerify, async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const deCodedEmail = req.decoded.email;
+            if (deCodedEmail !== email) {
+                return res.status(403).send('forbidden access')
+            }
+            const product = await ProductCollection.find(query).toArray();
+            res.send(product);
+        })
+
         app.get('/allProducts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -89,6 +100,12 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const orderProduct = await OrderCollection.find(query).toArray();
             res.send(orderProduct);
+        })
+        app.delete('/AddedProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const deleteProduct = await ProductCollection.deleteOne(query);
+            res.send(deleteProduct);
         })
         app.delete('/orderProducts/:id', async (req, res) => {
             const id = req.params.id;
