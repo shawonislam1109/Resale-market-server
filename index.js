@@ -51,6 +51,16 @@ async function run() {
         const UserCollection = client.db('Resale-market').collection('AllUser')
         const paymentCollection = client.db('Resale-market').collection('paymentDoc')
 
+        const AdminVerify = async (req, res, next) => {
+            const deCodedEmail = req.decoded.email;
+            const query = { email: deCodedEmail };
+            const user = await UserCollection.findOne(query);
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next()
+        }
+
         app.get('/allProducts', async (req, res) => {
             const query = {};
             const products = await ProductCollection.find(query).toArray()
@@ -130,7 +140,13 @@ async function run() {
             const users = await UserCollection.find(query).toArray();
             res.send(users);
         })
-        app.put('/allUsers/:id', async (req, res) => {
+        app.get('/allUser/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await UserCollection.findOne(query);
+            res.send({ isAdmin: user?.role == 'admin' })
+        })
+        app.put('/allUsers/:id', jwtVerify, AdminVerify, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const option = { upsert: true };
