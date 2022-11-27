@@ -96,6 +96,18 @@ async function run() {
             const result = await OrderCollection.deleteOne(filter);
             res.send(result);
         })
+        app.put('/orderProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    payment: 'paid'
+                }
+            };
+            const result = await OrderCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
         app.get('/allUsers', async (req, res) => {
             const query = {};
             const users = await UserCollection.find(query).toArray();
@@ -118,6 +130,7 @@ async function run() {
             const user = await UserCollection.insertOne(query)
             res.send(user)
         })
+
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
