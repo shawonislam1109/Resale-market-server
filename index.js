@@ -146,6 +146,12 @@ async function run() {
             const user = await UserCollection.findOne(query);
             res.send({ isAdmin: user?.role == 'admin' })
         })
+        app.get('/allUser', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await UserCollection.findOne(query);
+            res.send(user);
+        })
         app.put('/allUsers/:id', jwtVerify, AdminVerify, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
